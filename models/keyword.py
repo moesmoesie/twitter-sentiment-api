@@ -18,6 +18,6 @@ class Keyword:
         elif self.value.startswith("@"):
             new_keyword += self.value.replace(" ", "")
         else:
-            new_keyword += f"'{self.value}'"
+            new_keyword += f'"{self.value}"'
 
         return new_keyword

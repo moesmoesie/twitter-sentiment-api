@@ -20,11 +20,15 @@ class TwitterAPI():
         response = requests.get(SEARCH_URL, headers=HEADER)
         return response.status_code == 200
 
-    def create_params(self,keyword_groups: list[list[Keyword]]):
+    def create_params(self,keyword_groups: list[list[Keyword]],next_token):
         query_params = {
             "tweet.fields" : "created_at,public_metrics",
+            "max_results": 100 if os.environ.get('IS_PRODUCTION',"TRUE") == "TRUE" else 15
         }
 
+        if next_token:
+            query_params["next_token"] = next_token
+        
         query = ""
 
         for index,group in enumerate(keyword_groups):
@@ -42,17 +46,31 @@ class TwitterAPI():
 
 
     def search(self, keywords : list[list[Keyword]]):
-        query_params = self.create_params(keywords)
-        
-        response = requests.get(SEARCH_URL, headers=HEADER,params=query_params)
+        data = []
+        next_token = None
+        while True:
+            if len(data) >= 50:
+                break;
+                
+            query_params = self.create_params(keywords, next_token)
+            response = requests.get(SEARCH_URL, headers=HEADER,params=query_params)
 
-        if response.status_code != 200:
-            raise Exception(response.status_code, response.text)
+            if response.status_code != 200:
+                raise Exception(response.status_code, response.text)
 
+            json_data = response.json()
 
-        data: list = response.json()["data"]
-        if len(data) == 0:
-            return False
+            if "data" not in json_data:
+                break;
+
+            data.extend(response.json()["data"])
+
+            meta = json_data["meta"]
+
+            if "next_token" not in meta:
+                break;
+
+            next_token = meta["next_token"]
 
         df = pd.DataFrame(data)
         return df
