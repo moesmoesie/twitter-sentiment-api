@@ -1,14 +1,19 @@
-import os
-
 from flask import Flask
-
+from twitter_api import TwitterAPI
+import os
+from dotenv import load_dotenv
+load_dotenv()
 app = Flask(__name__)
-
 
 @app.route("/")
 def hello_world():
-    name = os.environ.get("NAME", "World")
-    return "Hello {}!".format(name)
+    twitter_api = TwitterAPI()
+    is_connected = twitter_api.check_connection()
+
+    if is_connected:
+        return "Twitter API is Connected"
+    else:
+        return "Twitter API is not Connected"
 
 
 if __name__ == "__main__":
