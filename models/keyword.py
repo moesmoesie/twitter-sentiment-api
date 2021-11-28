@@ -1,9 +1,10 @@
-from dataclasses import dataclass
-
-@dataclass
 class Keyword:
-    value: str
-    isNegated: bool
+    def __init__(self,value,isNegated) -> None:
+        self.value = value
+        if isNegated == "true":
+            self.isNegated = True
+        else:
+            self.isNegated = False
 
     def get_processed_value(self):
         new_keyword = "-" if self.isNegated else ""

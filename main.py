@@ -2,33 +2,41 @@ from flask import Flask
 from twitter_api import TwitterAPI
 import os
 from models.keyword import Keyword
+from flask import Flask, request, Response
+from flask import Response
 
 app = Flask(__name__)
 
-@app.route("/")
+@app.route("/", methods=['POST'])
 def hello_world():
-    twitter_api = TwitterAPI()
+    request_data = request.get_json()
+    
+    if "data" not in request_data:
+        return Response("Data not found!", status=400)
 
-    data = {
-        "keyword_groups": [
-            [
-                {"value" : "from:hugodejonge", "isNegated": False},
-                {"value" : "replies", "isNegated": True},
-            ]
-        ]
-    }
+    data = request_data["data"]
 
-    keyword_groups = []
-    for group in data["keyword_groups"]:
+    if "k-groups" not in data:
+        return Response("k-groups not found in data!", status=400)
+
+    k_groups = data["k-groups"]
+
+    keywords_data = []
+    for k_group in k_groups:
         keywords = []
-        for keyword in group:
-            keywords.append(Keyword(keyword["value"], keyword["isNegated"]))
-        keyword_groups.append(keywords)
+        for keyword in k_group:
+            if "value" in keyword:
+                value = keyword["value"]
+                isNegated = keyword.get("isNegated","false")
+                keywords.append(Keyword(value,isNegated))
+            else:
+                return Response("Every keyword must have a value!", status=400)
+        keywords_data.append(keywords)        
 
-    data = twitter_api.search(keyword_groups)
+    twitter_api = TwitterAPI()
+    data = twitter_api.search(keywords_data)
 
-    return data.to_json(orient="records",indent=2)
-
+    return Response(data.to_json(orient="records", indent=2), status=200, mimetype='application/json')
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
