@@ -5,8 +5,10 @@ import os
 from models.keyword import Keyword
 from flask import Flask, request, Response
 from flask import Response
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/", methods=['POST'])
 def hello_world():
