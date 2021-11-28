@@ -1,3 +1,4 @@
+import json
 from flask import Flask
 from twitter_api import TwitterAPI
 import os
@@ -36,7 +37,12 @@ def hello_world():
     twitter_api = TwitterAPI()
     data = twitter_api.search(keywords_data)
 
-    return Response(data.to_json(orient="records", indent=2), status=200, mimetype='application/json')
+    response = {
+        "tweet_count": data.shape[0],
+        "tweets": data.to_dict(orient="records")
+    }
+
+    return Response(json.dumps(response,indent=2), status=200, mimetype='application/json')
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))

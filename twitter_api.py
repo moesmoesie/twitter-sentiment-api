@@ -49,7 +49,7 @@ class TwitterAPI():
         data = []
         next_token = None
         while True:
-            if len(data) >= 50:
+            if len(data) >= 15:
                 break;
                 
             query_params = self.create_params(keywords, next_token)
