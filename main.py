@@ -1,19 +1,33 @@
 from flask import Flask
 from twitter_api import TwitterAPI
 import os
-from dotenv import load_dotenv
-load_dotenv()
+from models.keyword import Keyword
+
 app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
     twitter_api = TwitterAPI()
-    is_connected = twitter_api.check_connection()
 
-    if is_connected:
-        return "Twitter API is Connected"
-    else:
-        return "Twitter API is not Connected"
+    data = {
+        "keyword_groups": [
+            [
+                {"value" : "from:hugodejonge", "isNegated": False},
+                {"value" : "replies", "isNegated": True},
+            ]
+        ]
+    }
+
+    keyword_groups = []
+    for group in data["keyword_groups"]:
+        keywords = []
+        for keyword in group:
+            keywords.append(Keyword(keyword["value"], keyword["isNegated"]))
+        keyword_groups.append(keywords)
+
+    data = twitter_api.search(keyword_groups)
+
+    return data.to_json(orient="records",indent=2)
 
 
 if __name__ == "__main__":
