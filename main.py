@@ -14,10 +14,10 @@ CORS(app)
 def hello_world():
     request_data = request.get_json()
 
-    if "k-groups" not in request_data:
+    if "k_groups" not in request_data:
         return Response("k-groups not found in data!", status=400)
 
-    k_groups = request_data["k-groups"]
+    k_groups = request_data["k_groups"]
 
     keywords_data = []
     for k_group in k_groups:
