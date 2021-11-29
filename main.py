@@ -13,16 +13,11 @@ CORS(app)
 @app.route("/", methods=['POST'])
 def hello_world():
     request_data = request.get_json()
-    
-    if "data" not in request_data:
-        return Response("Data not found!", status=400)
 
-    data = request_data["data"]
-
-    if "k-groups" not in data:
+    if "k-groups" not in request_data:
         return Response("k-groups not found in data!", status=400)
 
-    k_groups = data["k-groups"]
+    k_groups = request_data["k-groups"]
 
     keywords_data = []
     for k_group in k_groups:
