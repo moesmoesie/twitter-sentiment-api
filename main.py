@@ -19,7 +19,25 @@ def analyse_sentiment(data_row):
     else:
         return "neutraal"
 
+def analyse_hashtags(data_row):
+    if not isinstance(data_row["entities"], dict):
+        return []
 
+    if "hashtags" not in data_row["entities"]:
+        return []
+
+    return list({hashtag["tag"] for hashtag in data_row["entities"]["hashtags"]})
+
+def analyse_hashtag_count(df):
+    hashtag_data = {}
+    for index, row in df.iterrows():
+        for hashtag in row["hashtags"]:
+            if hashtag in hashtag_data:
+                hashtag_data[hashtag] += 1
+            else:
+                hashtag_data[hashtag] = 1
+    return hashtag_data
+    
 @app.route("/", methods=['POST'])
 def hello_world():
     request_data = request.get_json()
@@ -45,14 +63,17 @@ def hello_world():
     data = twitter_api.search(keywords_data)
 
     data["sentiment"] = data.apply(analyse_sentiment, axis=1)
+    data["hashtags"] = data.apply(analyse_hashtags, axis=1)
 
     sentiment_count = data.groupby(['sentiment']).size().to_dict()
+    hashtag_count = analyse_hashtag_count(data)
 
 
     response = {
         "tweet_count": data.shape[0],
+        "hashtag_count" : hashtag_count,
         "sentiment_count": sentiment_count,
-        "tweets": data.to_dict(orient="records")
+        "tweets": data.to_dict(orient="records"),
     }
 
     return Response(json.dumps(response,indent=2), status=200, mimetype='application/json')

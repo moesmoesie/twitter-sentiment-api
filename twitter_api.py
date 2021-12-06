@@ -22,7 +22,7 @@ class TwitterAPI():
 
     def create_params(self,keyword_groups: list[list[Keyword]],next_token):
         query_params = {
-            "tweet.fields" : "created_at,public_metrics",
+            "tweet.fields" : "created_at,public_metrics,entities",
             "max_results": 100 if os.environ.get('IS_PRODUCTION',"TRUE") == "TRUE" else 15
         }
 
