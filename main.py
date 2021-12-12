@@ -61,10 +61,9 @@ def hello_world():
 
     twitter_api = TwitterAPI()
     data = twitter_api.search(keywords_data)
-
+    
     data["sentiment"] = data.apply(analyse_sentiment, axis=1)
     data["hashtags"] = data.apply(analyse_hashtags, axis=1)
-    data = data.drop("entities",axis=1)
 
     sentiment_count = data.groupby(['sentiment']).size().to_dict()
     hashtag_count = analyse_hashtag_count(data)
