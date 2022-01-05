@@ -55,7 +55,7 @@ class TwitterAPI():
                 break;
 
             url = f"https://api.twitter.com/2/users?ids={','.join(ids[current:current + 100])}&user.fields=profile_image_url,verified"
-            current += 100
+            current += 30
             response = requests.get(url, headers=HEADER)
             data.extend(response.json()["data"])
         return data
@@ -65,7 +65,7 @@ class TwitterAPI():
         data = []
         next_token = None
         while True:
-            if len(data) >= 250:
+            if len(data) >= 30:
                 break;
                 
             query_params = self.create_params(keywords, next_token)
@@ -104,7 +104,5 @@ class TwitterAPI():
                 'profile_image_url': 'none'
             }
         ).fillna(0)
-
-        print(df.describe())
 
         return df
